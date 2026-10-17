@@ -634,7 +634,7 @@ function wires(trace) {
       p = [a.right - box.left, a.top + a.height / 2 - box.top]; q = [b.left - box.left, b.top + b.height / 2 - box.top];
       const mx = (p[0] + q[0]) / 2; d = `M${p[0]},${p[1]} C${mx},${p[1]} ${mx},${q[1]} ${q[0]},${q[1]}`;
     }
-    svg.append(h("svg:path", { d, class: trace.dataset.drawn ? "" : "draw" }), h("svg:circle", { cx: p[0], cy: p[1], r: 3.2 }), h("svg:circle", { cx: q[0], cy: q[1], r: 3.2 }));
+    svg.append(h("svg:path", { d, pathLength: "1", class: trace.dataset.drawn ? "" : "draw" }), h("svg:circle", { cx: p[0], cy: p[1], r: 3.2 }), h("svg:circle", { cx: q[0], cy: q[1], r: 3.2 }));
   }
 }
 
