@@ -1,0 +1,43 @@
+# Agent Firewall policy for the Larkspur inbox assistant.
+#
+# action:  allow  - runs without review (other checks can still raise the risk)
+#          ask    - always held for a human reviewer
+#          deny   - never runs
+# ask_if:  conditions that turn an "allow" into an "ask".
+
+agent: inbox-assistant
+company_domains: [larkspur.example]
+review_timeout_seconds: 120          # a held call nobody answers is blocked
+
+# Tools whose output comes from outside the company. Everything they return
+# is labelled untrusted and tracked.
+untrusted_sources: [read_inbox, read_email]
+
+blocked_domains: []                  # recipients that are always refused
+
+default_action: ask                  # tools not listed below
+
+tools:
+  read_inbox:     { action: allow }
+  read_email:     { action: allow }
+  list_contacts:  { action: allow }
+  list_invoices:  { action: allow }
+  list_records:   { action: allow }
+
+  send_email:
+    action: allow
+    ask_if:
+      - when: recipient_outside_company
+        field: to
+        reason: Recipient is outside the company and not a saved contact
+      - when: has_value
+        field: attachment
+        reason: Email carries an attachment
+
+  delete_record:
+    action: ask
+    reason: Deleting a record is permanent
+
+  export_all_data:
+    action: deny
+    reason: Bulk export is never allowed for this agent

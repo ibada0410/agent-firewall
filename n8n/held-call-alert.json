@@ -1,0 +1,61 @@
+{
+  "name": "Agent Firewall: alert on held call",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agent-firewall-held",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "a1f0c2d4-0001-4a5b-9c11-000000000001",
+      "name": "Held call received",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "agent-firewall-held"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.body.level }}",
+              "rightValue": "red",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1f0c2d4-0002-4a5b-9c11-000000000002",
+      "name": "Is it red?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "firewall@your-company.example",
+        "toEmail": "security-reviewers@your-company.example",
+        "subject": "=Agent Firewall held {{ $json.body.tool }} (risk {{ $json.body.risk }})",
+        "emailFormat": "text",
+        "text": "=An AI agent action is waiting for review.\n\nAction: {{ $json.body.tool }}\nRisk: {{ $json.body.risk }} ({{ $json.body.level }})\nWhy: {{ $json.body.reasons.join('; ') }}\n\nReview it here: {{ $json.body.review_url }}\n\nIf nobody decides before the timeout, the firewall blocks it.",
+        "options": {}
+      },
+      "id": "a1f0c2d4-0003-4a5b-9c11-000000000003",
+      "name": "Email the reviewers",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [720, 220]
+    }
+  ],
+  "connections": {
+    "Held call received": { "main": [[{ "node": "Is it red?", "type": "main", "index": 0 }]] },
+    "Is it red?": { "main": [[{ "node": "Email the reviewers", "type": "main", "index": 0 }], []] }
+  },
+  "settings": { "executionOrder": "v1" }
+}
